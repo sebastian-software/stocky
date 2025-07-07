@@ -1,20 +1,44 @@
 import PQueue from "p-queue";
 
+/**
+ * Base URL for the Polygon API.
+ */
 const POLYGON_BASE_URL = "https://api.polygon.io/v3/";
+
+/**
+ * Base URL for the FMP API.
+ */
 const FMP_BASE_URL = "https://financialmodelingprep.com/";
 
+// 1 hour
+const CACHE_DURATION = 1000 * 60 * 60;
+
+/**
+ * Queue for fetching data.
+ */
 const queue = new PQueue({
   concurrency: 1, // Only 1 fetch at a time
   interval: 60_000, // 1 minute
   intervalCap: 60, // Max 60 fetches per minute
 });
 
+/**
+ * Convert a record of parameters to a query string.
+ * @param params - The parameters to convert to a query string.
+ * @returns The query string.
+ */
 export function toQueryString(params: Record<string, string>) {
   return Object.entries(params)
     .map(([key, value]) => `${key}=${value}`)
     .join("&");
 }
 
+/**
+ * Fetch data from the given URL.
+ * @param url - The URL to fetch data from.
+ * @param options - The options to pass to the fetch function.
+ * @returns The data from the URL.
+ */
 async function fetchData<DataType>(
   url: string,
   options?: RequestInit
@@ -26,6 +50,36 @@ async function fetchData<DataType>(
   return response.json() as Promise<DataType>;
 }
 
+const cache = new Map<string, { data: any; expiresAt: number }>();
+
+/**
+ * Fetch data from the given URL and cache the result.
+ * @param url - The URL to fetch data from.
+ * @param options - The options to pass to the fetch function.
+ * @returns The data from the URL.
+ */
+async function cachedFetch<DataType = unknown>(
+  url: string,
+  options?: RequestInit
+): Promise<DataType> {
+  const cacheKey = `${url}-${JSON.stringify(options)}`;
+  const cached = cache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data as Promise<DataType>;
+  }
+
+  const data = await fetchData(url, options);
+  cache.set(cacheKey, { data, expiresAt: Date.now() + CACHE_DURATION });
+  console.log("- Cached:", cacheKey);
+  return data as Promise<DataType>;
+}
+
+/**
+ * Fetch data from the Polygon API.
+ * @param path - The path to fetch data from.
+ * @param options - The options to pass to the fetch function.
+ * @returns The data from the Polygon API.
+ */
 export function polygonFetch<DataType = unknown>(
   path: string,
   options?: RequestInit
@@ -39,17 +93,23 @@ export function polygonFetch<DataType = unknown>(
   };
 
   return queue.add(() =>
-    fetchData(POLYGON_BASE_URL + path, optionsWithAuth)
+    cachedFetch(POLYGON_BASE_URL + path, optionsWithAuth)
   ) as Promise<DataType>;
 }
 
+/**
+ * Fetch data from the FMP API.
+ * @param path - The path to fetch data from.
+ * @param options - The options to pass to the fetch function.
+ * @returns The data from the FMP API.
+ */
 export function fmpFetch<DataType = unknown>(
   path: string,
   options?: RequestInit
 ): Promise<DataType> {
   return queue.add(() => {
     const addSymbol = path.includes("?") ? "&" : "?";
-    return fetchData(
+    return cachedFetch(
       FMP_BASE_URL + path + addSymbol + `apikey=${process.env.FMP_API_KEY}`,
       options
     );
