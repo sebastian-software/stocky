@@ -1,0 +1,98 @@
+{
+  "compilerOptions": {
+    // ========================================
+    // MODULE RESOLUTION & INTEROP
+    // ========================================
+
+    // Specifies the module code generation method
+    "module": "ESNext",
+
+    // How TypeScript resolves module imports
+    "moduleResolution": "Bundler",
+
+    // Forces TypeScript to treat files as modules
+    "moduleDetection": "force",
+
+    // Allows default imports from modules with no default export
+    "allowSyntheticDefaultImports": true,
+
+    // Enables interop between CommonJS and ES modules
+    "esModuleInterop": true,
+
+    // Requires explicit import/export syntax
+    "verbatimModuleSyntax": true,
+
+    // Ensures each file can be safely transpiled independently
+    "isolatedModules": true,
+
+    // Allows importing JSON files as modules
+    "resolveJsonModule": true,
+
+    // ========================================
+    // TYPE CHECKING
+    // ========================================
+
+    // Enables all strict type checking options
+    "strict": true,
+
+    // Requires explicit override keyword when overriding methods
+    "noImplicitOverride": true,
+
+    // Ensures all code paths return a value
+    "noImplicitReturns": true,
+
+    // Prevents fallthrough in switch statements
+    "noFallthroughCasesInSwitch": true,
+
+    // Prevents importing modules with side effects
+    "noUncheckedSideEffectImports": true,
+
+    // ========================================
+    // JAVASCRIPT & JSX
+    // ========================================
+
+    // Disables JavaScript file compilation
+    "allowJs": false,
+
+    // Enables JSX compilation with React's new transform
+    "jsx": "react-jsx",
+
+    // ========================================
+    // OUTPUT & DECLARATION
+    // ========================================
+
+    // Generates corresponding .d.ts declaration files
+    "declaration": true,
+
+    // Generates source maps for declaration files
+    "declarationMap": true,
+
+    // Generates source maps for debugging
+    "sourceMap": true,
+
+    // Specifies the root directory of input files
+    "rootDir": ".",
+
+    // ========================================
+    // RUNTIME & LIBRARIES
+    // ========================================
+
+    // Specifies ECMAScript target version
+    "target": "es2025",
+
+    // Specifies library files to include in compilation
+    "lib": ["es2025"],
+
+    // ========================================
+    // FILE HANDLING
+    // ========================================
+
+    // Ensures consistent file naming across platforms
+    "forceConsistentCasingInFileNames": true,
+
+    // Skips type checking of declaration files
+    "skipLibCheck": true
+  },
+
+  "exclude": ["node_modules", "dist", "tmp"]
+}
