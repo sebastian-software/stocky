@@ -78,10 +78,10 @@
     // ========================================
 
     // Specifies ECMAScript target version
-    "target": "es2025",
+    "target": "ESNext",
 
     // Specifies library files to include in compilation
-    "lib": ["es2025"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
 
     // ========================================
     // FILE HANDLING
