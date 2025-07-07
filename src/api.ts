@@ -1,9 +1,5 @@
 import PQueue from "p-queue";
-
-/**
- * Base URL for the Polygon API.
- */
-const POLYGON_BASE_URL = "https://api.polygon.io/v3/";
+import { MIN_VOLUME } from "./config";
 
 /**
  * Base URL for the FMP API.
@@ -27,7 +23,9 @@ const queue = new PQueue({
  * @param params - The parameters to convert to a query string.
  * @returns The query string.
  */
-export function toQueryString(params: Record<string, string>) {
+export function toQueryString(
+  params: Record<string, string | number | boolean>
+) {
   return Object.entries(params)
     .map(([key, value]) => `${key}=${value}`)
     .join("&");
@@ -75,29 +73,6 @@ async function cachedFetch<DataType = unknown>(
 }
 
 /**
- * Fetch data from the Polygon API.
- * @param path - The path to fetch data from.
- * @param options - The options to pass to the fetch function.
- * @returns The data from the Polygon API.
- */
-export function polygonFetch<DataType = unknown>(
-  path: string,
-  options?: RequestInit
-): Promise<DataType> {
-  const optionsWithAuth = {
-    ...options,
-    headers: {
-      ...options?.headers,
-      Authorization: `Bearer ${process.env.POLY_API_KEY}`,
-    },
-  };
-
-  return queue.add(() =>
-    cachedFetch(POLYGON_BASE_URL + path, optionsWithAuth)
-  ) as Promise<DataType>;
-}
-
-/**
  * Fetch data from the FMP API.
  * @param path - The path to fetch data from.
  * @param options - The options to pass to the fetch function.
@@ -120,19 +95,18 @@ async function main() {
   const data = await fmpFetch("stable/search-symbol?query=AAPL");
   console.log("AAPL Search:", data);
 
-  const data2 = await fmpFetch(
+  const companies = await fmpFetch(
     "stable/company-screener?" +
       toQueryString({
-        marketCapMoreThan: "10000000000",
-        isActivelyTrading: "true",
-        volumeMoreThan: "250000",
-        isEtf: "false",
-        isFund: "false",
+        isActivelyTrading: true,
+        volumeMoreThan: MIN_VOLUME,
+        isEtf: false,
+        isFund: false,
         country: "US",
-        limit: "10000",
+        limit: 10000,
       })
   );
-  console.log("Stock Screener:", data2, data2.length);
+  console.log("Stock Screener:", companies, companies.length);
 }
 
 void main();
