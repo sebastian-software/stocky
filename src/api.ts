@@ -2,6 +2,35 @@ import PQueue from "p-queue";
 import { MIN_VOLUME } from "./config";
 
 /**
+ * Interface for company stock data from FMP API.
+ */
+interface CompanyStockData {
+  symbol: string;
+  companyName: string;
+  marketCap: number;
+  sector: string;
+  industry: string;
+  beta: number;
+  price: number;
+  lastAnnualDividend: number;
+  volume: number;
+  exchange: string;
+  exchangeShortName: string;
+  country: string;
+  isEtf: boolean;
+  isFund: boolean;
+  isActivelyTrading: boolean;
+}
+
+interface SymbolReponse {
+  symbol: string;
+  name: string;
+  currency: string;
+  exchangeFullName: string;
+  exchange: string;
+}
+
+/**
  * Base URL for the FMP API.
  */
 const FMP_BASE_URL = "https://financialmodelingprep.com/";
@@ -92,10 +121,12 @@ export function fmpFetch<DataType = unknown>(
 }
 
 async function main() {
-  const data = await fmpFetch("stable/search-symbol?query=AAPL");
-  console.log("AAPL Search:", data);
+  const aaplSymbols = await fmpFetch<SymbolReponse[]>(
+    "stable/search-symbol?query=AAPL"
+  );
+  console.log("AAPL Search:", aaplSymbols);
 
-  const companies = await fmpFetch(
+  const companies = await fmpFetch<CompanyStockData[]>(
     "stable/company-screener?" +
       toQueryString({
         isActivelyTrading: true,
@@ -106,7 +137,7 @@ async function main() {
         limit: 10000,
       })
   );
-  console.log("Stock Screener:", companies, companies.length);
+  // console.log("Stock Screener:", companies, companies.length);
 }
 
 void main();
